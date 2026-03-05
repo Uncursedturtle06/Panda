@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e2128;
+            color: rgb(255, 255, 255);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #861fa3;
+            color: #1e2128;
+            padding: 15px 30px;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-layout {
+            display: flex;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar {
+            width: 250px;
+            padding-right: 20px;
+        }
+
+        /* Styling für die Sidebar-Überschrift */
+        .sidebar h3 {
+            color: #888;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .sidebar p,
+        .sidebar a {
+            font-size: 14px;
+            margin: 10px 0;
+            cursor: pointer;
+            text-decoration: none;
+            /* Entfernt den Unterstrich beim Link */
+            display: block;
+        }
+
+        .active-link {
+            color: #fe70da;
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            border-left: 1px solid #333;
+            padding-left: 30px;
+            background: rgba(30, 33, 40, 0.7);
+            border-radius: 10px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #ffffff;
+            border-bottom: 1px solid #fd35b0;
+            padding-bottom: 5px;
+        }
+
+        button {
+            background-color: #b6acff;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+        }
+
+        button:hover {
+            background-color: #f7a1e7;
+        }
+
+        /* PANDA-EMOJI ANIMATION */
+        .panda-fly {
+            position: fixed;
+            font-size: 60px;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.5;
+            user-select: none;
+        }
+
+        @keyframes moveEmoji {
+            0% {
+                transform: translate(-150px, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(calc(100vw + 150px), 150px) rotate(360deg);
+            }
+        }
+
+        .open-text {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .closed-text {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* DEIN GLAS OPTIK STYLE */
+        .glas-element {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            display: inline-block;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div style="font-size: 30px;"><span class="glas-element">Pandas</span></div>
+        <div style="font-size: 15px;">Emelie | 🐼</div>
+    </header>
+
+    <div class="main-layout">
+        <div class="sidebar">
+            <h3>Menü</h3>
+            <p>Öffnungszeiten: 08:00 - 20:00 Uhr</p>
+
+            <a href="http://127.0.0.1:5500/Kraft/Webseite1/Warenkorb.html">
+                <p class="active-link">Warenkorb</p>
+            </a>
+
+            <a href="http://127.0.0.1:5500/Kraft/Webseite1/QuizPandas.html">
+                <p class="active-link">Quiz</p>
+            </a>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Offen/Geschlossen</h2>
+                <p id="status-uhr">Wird berechnet...</p>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div id="panda-layer"></div>
+
+    <script>
+        // --- FUNKTION: PANDAS ERSTELLEN ---
+        function fliegendeEmojis() {
+            const layer = document.getElementById('panda-layer');
+            if (!layer) return;
+
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.innerText = '🐼';
+                p.className = 'panda-fly';
+
+                p.style.top = Math.random() * 90 + "vh";
+                p.style.left = "-150px";
+
+                const dauer = 10 + Math.random() * 15;
+                const delay = Math.random() * -20;
+
+                p.style.animation = `moveEmoji ${dauer}s linear infinite`;
+                p.style.animationDelay = `${delay}s`;
+
+                layer.appendChild(p);
+            }
+        }
+
+        // --- FUNKTION: UHRZEIT CHECK ---
+        function zeitCheck() {
+            const stunde = new Date().getHours();
+            const anzeige = document.querySelector('#status-uhr');
+            if (anzeige) {
+                if (stunde >= 8 && stunde < 20) {
+                    anzeige.innerHTML = 'Wir haben gerade <span class="open-text">GEÖFFNET</span>.';
+                } else {
+                    anzeige.innerHTML = 'Wir haben gerade <span class="closed-text">GESCHLOSSEN</span>.';
+                }
+            }
+        }
+
+        // --- FUNKTION: QUIZ ---
+        function antwort(richtig) {
+            const f = document.querySelector('#quiz-feedback');
+            if (!f) return;
+            if (richtig) {
+                f.innerText = "Super! Bambus ist lecker. ✅";
+                f.style.color = "#4caf50";
+            } else {
+                f.innerText = "Leider falsch, probier's nochmal! ❌";
+                f.style.color = "#f44336";
+            }
+        }
+
+        // Alles beim Laden starten
+        window.onload = function () {
+            fliegendeEmojis();
+            zeitCheck();
+        };
+    </script>
+
+</body>
+
+</html>

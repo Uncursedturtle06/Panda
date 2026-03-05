@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panda Quiz</title>
+    <style>
+        
+        
+        .main-layout {
+            display: flex;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        :root {
+            --primary: #25374d;
+            --secondary: #f5f5f5;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Arial, Geneva, sans-serif';
+            background-color: #1e2128;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background: rgb(119, 109, 171);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border: 2px solid var(--primary);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        #next-btn {
+            margin-top: 20px;
+            background: var(--primary);
+            color: white;
+            display: none; /* Erst nach Antwort zeigen */
+            width: 100%;
+        }
+
+        #score-container {
+            display: none;
+        }
+
+        .correct { background-color: var(--success) !important; color: white; border-color: var(--success); }
+        .wrong { background-color: var(--error) !important; color: white; border-color: var(--error); }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="question-content">
+        <div id="question-number" style="color: #d8c2f1; margin-bottom: 5px;"></div>
+        <div class="question" id="question-text">Frage wird geladen...</div>
+        <div class="options" id="answer-buttons">
+            </div>
+        <button id="next-btn">Nächste Frage</button>
+    </div>
+
+    <div id="score-container">
+        <h2>Quiz beendet!</h2>
+        <p id="final-score"></p>
+        <button onclick="location.reload()">Nochmal versuchen</button>
+    </div>
+</div>
+
+<script>
+    // Fragen
+    const questions = [
+        { q: "Wo leben Pandas", a: [ {t: "China", c: true}, {t: "Asien", c: false}, {t: "Japan", c: false} ] },
+        { q: "Wie viele Arten von Pandas gibt es?", a: [ {t: "4", c: false}, {t: "2", c: true}, {t: "1", c: false} ] },
+        { q: "Welche sind diese arten?", a: [ {t: "großer Panda & roter Panda", c: true}, {t: "Eisbären & Pandas", c: false}, {t: "große Pandas & kleine Pandas", c: false} ] },
+        { q: "Machen Pandas einen Winterschlaf?", a: [ {t: "Nein", c: true}, {t: "Ja", c: false}, {t: "Das weiß man nicht", c: false}] },
+        { q: "Können Pandas klettern und schwimmen?", a: [ {t: "Ja", c: true}, {t: "Nein", c: false} ] },
+        { q: "Was fressen Pandas am liebsten 🐼?", a: [ {t: "Fleisch", c: false}, {t: "Pflanzen", c: false}, {t: "Bambus", c: true} ] },
+        { q: "Können Pandas Bambus gut verdauen?", a: [ {t: "Ja", c: false}, {t: "#", c: false}, {t: "Nein", c: true} ] },
+        { q: "Wie lange verbringt ein Panda im Durchschnitt täglich mit Fressen?", a: [ {t: "4 - 8 Stunden", c: false}, {t: "1 - 3 Stunden", c: false}, {t: "10 - 16 Stunden", c: true} ] },
+        { q: "Wie lange schlafen Pandas", a: [ {t: "8 - 12 Stunden", c: true}, {t: "6 - 7 Stunden", c: true}, {t: "14 -16 Stunden", c: false} ] },
+        { q: "Welche farbe haben Pandas unterm Fell", a: [ {t: "Rosa", c: false}, {t: "Weiß", c: false}, {t: "Weiß & Schwarz", c: true} ] },
+        { q: "Wie schwer ist ein Panda-Baby bei der Geburt ungefähr?", a: [ {t: "50 - 100 Gramm", c: false}, {t: "100 - 150 Gramm", c: true}, {t: "130 - 160 Gramm", c: false} ] },
+        { q: "Wofür nutzen Pandas laut Wissenschaftlern ihre schwarzen Augenflecken?", a: [ {t: "Um sich gegenseitig zu erkennen und Feinde abzuschrecken", c: true}, {t: "Um im dunklen Wald besser sehen zu können", c: false}, {t: "Um Sonnenlicht zu absorbieren", c: false} ] },
+        { q: "Wie viel wiegen weibliche Pandas?", a: [ {t: "70 - 100 kg", c: true}, {t: "100 - 150 kg", c: false}, {t: "40 - 60 kg", c: false} ] },
+        { q: "Wie viel wiegen männliche Pandas?", a: [ {t: "130 - 150 kg", c: false}, {t: "100 - 115 kg", c: true}, {t: "120 - 150 kg", c: false} ] },
+        { q: "Sind Pandas Süß", a: [ {t: "Ja ", c: true}, {t: "Ja", c: true}, {t: "Ja", c: true} ] }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionText = document.getElementById('question-text');
+    const answerButtons = document.getElementById('answer-buttons');
+    const nextButton = document.getElementById('next-btn');
+    const questionNumber = document.getElementById('question-number');
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        resetState();
+        let currentQuestion = questions[currentQuestionIndex];
+        questionNumber.innerText = `Frage ${currentQuestionIndex + 1} von ${questions.length}`;
+        questionText.innerText = currentQuestion.q;
+
+        currentQuestion.a.forEach(answer => {
+            const button = document.createElement('button');
+            button.innerText = answer.t;
+            button.classList.add('btn');
+            if (answer.c) button.dataset.correct = answer.c;
+            button.addEventListener('click', selectAnswer);
+            answerButtons.appendChild(button);
+        });
+    }
+
+    function resetState() {
+        nextButton.style.display = 'none';
+        while (answerButtons.firstChild) {
+            answerButtons.removeChild(answerButtons.firstChild);
+        }
+    }
+
+    function selectAnswer(e) {
+        const selectedBtn = e.target;
+        const isCorrect = selectedBtn.dataset.correct === "true";
+        if (isCorrect) {
+            selectedBtn.classList.add('correct');
+            score++;
+        } else {
+            selectedBtn.classList.add('wrong');
+        }
+        Array.from(answerButtons.children).forEach(button => {
+            if(button.dataset.correct === "true") button.classList.add('correct');
+            button.disabled = true;
+        });
+        nextButton.style.display = 'block';
+    }
+
+    nextButton.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            showScore();
+        }
+    });
+
+    function showScore() {
+        document.getElementById('question-content').style.display = 'none';
+        const scoreContainer = document.getElementById('score-container');
+        scoreContainer.style.display = 'block';
+        document.getElementById('final-score').innerText = `Du hast ${score} von ${questions.length} Punkten erreicht!`;
+    }
+
+    startQuiz();
+</script>
+
+</body>
+</html>
